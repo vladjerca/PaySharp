@@ -1,0 +1,69 @@
+﻿using InternationalPayments.PayPal;
+using PaySharp.InternationalPayments.Skrill;
+using PaySharp.InternationalPayments.Skrill.Models;
+using PaySharp.Models;
+using System.Web.Mvc;
+
+namespace PaySharp.Example.Controllers
+{
+    public class HomeController : Controller
+    {
+        #region Initialize
+        public static PayPal paypalPayment = new PayPal();
+        public static Skrill skrillPayment = new Skrill();
+        public static CartModel cart;
+
+        public HomeController()
+        {
+            cart = new CartModel();
+            cart.Currency = "USD";
+            cart.CancelURL = "http://localhost:29110";
+            cart.ClientEmail = "vlad.jerca@yahoo.com";
+
+            cart.Items.Add(new Models.ProductModel
+            {
+                ProductName = "Drugs",
+                Quantity = 2,
+                UnitPrice = 60
+            });
+        }
+        #endregion
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        #region Skrill
+        public ActionResult Skrill()
+        {
+            cart.ReturnURL = "http://localhost:29110/Home/Skrill";
+            var result = skrillPayment.Authorize(cart);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult Skrill(SkrillCheckout details)
+        {
+            return Json(details, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
+        #region PayPal
+        public ActionResult PayPal(string token, string payerId)
+        {
+            if (token == null)
+            {
+                cart.ReturnURL = "http://localhost:29110/Home/PayPal";
+                var result = paypalPayment.Authorize(cart);
+                return Redirect(result.CheckoutUrl);
+            }
+            else
+            {
+                var result = paypalPayment.Pay("120", token);
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+        }
+        #endregion
+    }
+}
