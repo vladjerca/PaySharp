@@ -34,7 +34,7 @@ namespace PaySharp.InternationalPayments.PayPal.API
         public string _ppCurrency { get; set; }
         #endregion
 
-        public PayPalApi()
+        internal PayPalApi()
         {
 
             if (!bool.TryParse(ConfigurationManager.AppSettings["PayPalSandboxActive"], out _isSandboxed))
@@ -56,7 +56,7 @@ namespace PaySharp.InternationalPayments.PayPal.API
             _host = _isSandboxed ? _sandboxHost : _releaseHost;
         }
 
-        public PayPalAuth Checkout(CartModel cart)
+        internal PayPalAuth Checkout(CartModel cart)
         {
             NameValueCollection outgoingQueryString = HttpUtility.ParseQueryString(String.Empty);
 
@@ -78,7 +78,7 @@ namespace PaySharp.InternationalPayments.PayPal.API
 
             outgoingQueryString.Add(AuthQuery);
 
-            var result = Web.Post(_endpoint, outgoingQueryString.ToString(), ContentType.Default);
+            var result = Web.Post(_endpoint, outgoingQueryString, ContentType.Default);
 
             var decodedResponse = HttpUtility.ParseQueryString(result.Response);
             decodedResponse["HOST"] = _host;
@@ -86,7 +86,7 @@ namespace PaySharp.InternationalPayments.PayPal.API
             return new PayPalAuth(decodedResponse);
         }
 
-        public PayPalDetails CheckoutDetails(string token)
+        internal PayPalDetails CheckoutDetails(string token)
         {
             if (_isSandboxed)
             {
@@ -99,14 +99,14 @@ namespace PaySharp.InternationalPayments.PayPal.API
             outgoingQueryString["TOKEN"] = token;
             outgoingQueryString.Add(AuthQuery);
 
-            var result = Web.Post(_endpoint, outgoingQueryString.ToString());
+            var result = Web.Post(_endpoint, outgoingQueryString);
 
             var decodedResponse = HttpUtility.ParseQueryString(result.Response);
 
             return new PayPalDetails(decodedResponse);
         }
 
-        public PayPalCheckout Finalize(string finalPaymentAmount, string token, string payerId)
+        internal PayPalCheckout Finalize(string finalPaymentAmount, string token, string payerId)
         {
             NameValueCollection outgoingQueryString = HttpUtility.ParseQueryString(string.Empty);
             outgoingQueryString["METHOD"] = "DoExpressCheckoutPayment";
@@ -118,7 +118,7 @@ namespace PaySharp.InternationalPayments.PayPal.API
 
             outgoingQueryString.Add(AuthQuery);
 
-            var result = Web.Post(_endpoint, outgoingQueryString.ToString());
+            var result = Web.Post(_endpoint, outgoingQueryString);
 
             NameValueCollection decodedResponse = HttpUtility.ParseQueryString(result.Response);
 

@@ -34,6 +34,7 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,11 +47,10 @@
     <Compile Include="Exceptions\PaymentException.cs" />
     <Compile Include="Http\Http.cs" />
     <Compile Include="Http\Models\HttpResponse.cs" />
-    <Compile Include="InternationalPayments\PaySafeCard\PaySafeCard.cs" />
     <Compile Include="InternationalPayments\Skrill\API\SkrillApi.cs" />
     <Compile Include="InternationalPayments\Skrill\Models\SkrillCheckout.cs" />
     <Compile Include="InternationalPayments\Skrill\Models\SkrillError.cs" />
-    <Compile Include="InternationalPayments\Skrill\Models\SkrillResponse.cs" />
+    <Compile Include="InternationalPayments\Skrill\Models\SkrillAuth.cs" />
     <Compile Include="InternationalPayments\Skrill\Skrill.cs" />
     <Compile Include="InternationalPayments\PayPal\API\PayPalApi.cs" />
     <Compile Include="InternationalPayments\PayPal\Models\PayPalResponse.cs" />
@@ -59,6 +59,9 @@
     <Compile Include="InternationalPayments\PayPal\Models\PayPalAuth.cs" />
     <Compile Include="InternationalPayments\PayPal\Models\PayPalError.cs" />
     <Compile Include="InternationalPayments\PayPal\PayPal.cs" />
+    <Compile Include="InternationalPayments\WePay\API\WePayApi.cs" />
+    <Compile Include="InternationalPayments\WePay\Models\WePayError.cs" />
+    <Compile Include="InternationalPayments\WePay\Models\WePayAuth.cs" />
     <Compile Include="InternationalPayments\WePay\WePay.cs" />
     <Compile Include="Models\CartModel.cs" />
     <Compile Include="InternationalPayments\PayPal\Models\PayPalAddress.cs" />

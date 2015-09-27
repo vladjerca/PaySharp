@@ -1,8 +1,10 @@
 ﻿using PaySharp.Http.Models;
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Web.Script.Serialization;
 
 namespace PaySharp.Http
 {
@@ -17,26 +19,39 @@ namespace PaySharp.Http
     {
         internal static int Timeout = 15000;
 
-        internal static HttpResponse Post(string url, string postData, ContentType contentEncode = ContentType.FormData)
+        internal static HttpResponse Post(string url, NameValueCollection requestData, ContentType contentEncode = ContentType.FormData, NameValueCollection headers = null)
         {
             HttpResponse responseData = new HttpResponse();
 
-            WebRequest httpRequest = WebRequest.Create(url);
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(url);
             httpRequest.Timeout = Timeout;
             httpRequest.Method = "POST";
-            httpRequest.ContentLength = postData.Length;
+            httpRequest.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)";
+
+            string postData = string.Empty;
+
+            if (headers != null)
+                httpRequest.Headers.Add(headers);
 
             switch(contentEncode)
             {
-                case ContentType.FormData:
-                    httpRequest.ContentType = "application/x-www-form-urlencoded";
-                    break;
                 case ContentType.Json:
                     httpRequest.ContentType = "application/json";
+                    var dictionary = requestData
+                                    .AllKeys
+                                    .ToDictionary(k => k, k => requestData[k]);
+                    postData = new JavaScriptSerializer().Serialize(dictionary);
+                    break;
+                case ContentType.FormData:
+                    httpRequest.ContentType = "application/x-www-form-urlencoded";
+                    postData = requestData.ToString();
                     break;
                 default:
+                    postData = requestData.ToString();
                     break;
             }
+
+            httpRequest.ContentLength = postData.Length;
 
             try
             {
@@ -50,18 +65,28 @@ namespace PaySharp.Http
                 throw ex;
             }
 
-            HttpWebResponse httpRespone = (HttpWebResponse)httpRequest.GetResponse();
-            
-            using (StreamReader sr = new StreamReader(httpRespone.GetResponseStream()))
+            HttpWebResponse httpResponse;
+
+            try
+            {
+                httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+
+            }
+            catch (WebException ex)
+            {
+                httpResponse = (HttpWebResponse)ex.Response;
+            }
+
+            using (StreamReader sr = new StreamReader(httpResponse.GetResponseStream()))
             {
                 responseData.Response = sr.ReadToEnd();
             }
 
-            var keys = httpRespone.Headers.AllKeys;
+            var keys = httpResponse.Headers.AllKeys;
 
             foreach(var key in keys)
             {
-                var values = httpRespone.Headers.GetValues(key);
+                var values = httpResponse.Headers.GetValues(key);
                 if (values.Length > 1)
                 {
                     for (int i = 0; i < values.Length; i++)
@@ -71,8 +96,8 @@ namespace PaySharp.Http
                 responseData.Headers.Add(key, values.FirstOrDefault());
             }
 
-            responseData.StatusCode = (int)httpRespone.StatusCode;
-            responseData.StatusDescription = httpRespone.StatusDescription;
+            responseData.StatusCode = (int)httpResponse.StatusCode;
+            responseData.StatusDescription = httpResponse.StatusDescription;
             responseData.Host = url;
 
             return responseData;

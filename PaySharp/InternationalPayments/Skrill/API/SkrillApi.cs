@@ -1,13 +1,11 @@
 ﻿using PaySharp.Exceptions;
 using PaySharp.Http;
+using PaySharp.InternationalPayments.Skrill.Models;
 using PaySharp.Models;
 using System;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Web;
-using System.Linq;
-using System.Text.RegularExpressions;
-using PaySharp.InternationalPayments.Skrill.Models;
 
 namespace PaySharp.InternationalPayments.Skrill.API
 {
@@ -21,7 +19,7 @@ namespace PaySharp.InternationalPayments.Skrill.API
         private string _statusUrl;
         #endregion
 
-        public SkrillApi()
+        internal SkrillApi()
         {
             if (!bool.TryParse(ConfigurationManager.AppSettings["SkrillSandboxActive"], out _isSandboxed))
                 _isSandboxed = false;
@@ -35,7 +33,7 @@ namespace PaySharp.InternationalPayments.Skrill.API
                 throw new PaymentConfigurationException("SkrillMerchantEmail");
         }
 
-        public SkrillAuth Checkout(CartModel cart)
+        internal SkrillAuth Checkout(CartModel cart)
         {
             NameValueCollection outgoingQueryString = HttpUtility.ParseQueryString(String.Empty);
             outgoingQueryString["pay_to_email"] = _merchantEmail;
@@ -48,10 +46,9 @@ namespace PaySharp.InternationalPayments.Skrill.API
             outgoingQueryString["currency"] = cart.Currency;
             outgoingQueryString["prepare_only"] = "1";
 
-            string postData = outgoingQueryString.ToString();
             string endpoint = _isSandboxed ? _sandboxEndpoint : _releaseEndpoint;
 
-            var response = Web.Post(endpoint, postData);
+            var response = Web.Post(endpoint, outgoingQueryString);
 
             SkrillAuth skrillResponse = new SkrillAuth(response);
 

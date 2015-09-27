@@ -1,6 +1,7 @@
 ﻿using InternationalPayments.PayPal;
 using PaySharp.InternationalPayments.Skrill;
 using PaySharp.InternationalPayments.Skrill.Models;
+using PaySharp.InternationalPayments.WePay;
 using PaySharp.Models;
 using System.Web.Mvc;
 
@@ -9,8 +10,9 @@ namespace PaySharp.Example.Controllers
     public class HomeController : Controller
     {
         #region Initialize
-        public static PayPal paypalPayment = new PayPal();
-        public static Skrill skrillPayment = new Skrill();
+        public static PayPal payPal = new PayPal();
+        public static Skrill skrill = new Skrill();
+        public static WePay wePay = new WePay();
         public static CartModel cart;
 
         public HomeController()
@@ -19,11 +21,10 @@ namespace PaySharp.Example.Controllers
             cart.Currency = "USD";
             cart.CancelURL = "http://localhost:29110";
             cart.ClientEmail = "vlad.jerca@yahoo.com";
-
-            cart.Items.Add(new Models.ProductModel
+            cart.Items.Add(new ProductModel
             {
-                ProductName = "Drugs",
-                Quantity = 2,
+                ProductName = "Test",
+                Quantity = 1,
                 UnitPrice = 60
             });
         }
@@ -38,7 +39,7 @@ namespace PaySharp.Example.Controllers
         public ActionResult Skrill()
         {
             cart.ReturnURL = "http://localhost:29110/Home/Skrill";
-            var result = skrillPayment.Authorize(cart);
+            var result = skrill.Authorize(cart);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
@@ -55,14 +56,28 @@ namespace PaySharp.Example.Controllers
             if (token == null)
             {
                 cart.ReturnURL = "http://localhost:29110/Home/PayPal";
-                var result = paypalPayment.Authorize(cart);
+                var result = payPal.Authorize(cart);
                 return Redirect(result.CheckoutUrl);
             }
             else
             {
-                var result = paypalPayment.Pay("120", token);
+                var result = payPal.Pay("120", token);
                 return Json(result, JsonRequestBehavior.AllowGet);
             }
+        }
+        #endregion
+
+        #region WePay
+        public ActionResult WePay(int checkout_id = 0)
+        {
+            if (checkout_id == 0)
+            {
+                cart.ReturnURL = "http://localhost:29110/Home/WePay";
+                var result = wePay.Authorize(cart);
+                return Redirect(result.CheckoutUrl);
+            }
+
+            return Json(wePay.Confirm(checkout_id), JsonRequestBehavior.AllowGet);
         }
         #endregion
     }
