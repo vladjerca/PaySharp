@@ -1,5 +1,6 @@
 # PaySharp
 Payments made easy.
+<br/>
 ![Darkroom](https://media.licdn.com/mpr/mpr/jc/AAEAAQAAAAAAAAXhAAAAJGI5ZjVhN2ZmLThmNWQtNGVkYy04NTI2LTAzMjgzNjgwZTg4Nw.jpg)
 
 ### Configuration
